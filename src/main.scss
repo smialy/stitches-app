@@ -1,0 +1,51 @@
+:root {
+    --primary-color: #2196F3;
+
+    --app-bar-background: var(--primary-color);
+    --app-bar-text-color: #fff;
+
+    --app-menu-width: 300px;
+}
+
+.container {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: var(--app-menu-width) 1fr;
+}
+
+.flosses {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+.floss {
+    display: flex;
+    width: 400px;
+    margin: 2px;
+    padding: 4px;
+    border: solid 1px #ddd;
+    border-radius: 3px;
+    overflow: hidden;
+    &-number {
+        width: 40px;
+        text-align: center;
+    }
+    &-color {
+        width: 30px;
+        height: 30px;
+        margin: -4px;
+        border-left: 1px solid #ddd;
+    }
+    &-size {
+        width: 40px;
+    }
+}
+.floss-type {
+
+}
+.floss
+.floss-color {
+}
+.floss-name {
+    flex-grow: 1;
+}

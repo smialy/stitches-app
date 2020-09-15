@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "dev": "parcel src/index.html"
+  },
+  "devDependencies": {
+    "parcel": "^1.12.4",
+    "sass": "^1.26.10"
+  },
+  "browserslist": [
+    "last 1 chrome version",
+    "last 1 firefox version"
+  ],
+  "dependencies": {
+    "dexie": "^3.0.2",
+    "preact": "^10.4.8",
+    "preact-router": "^3.2.1"
+  }
+}

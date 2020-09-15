@@ -1,0 +1,60 @@
+.s-navbar {
+    padding: .5rem 1rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 4rem;
+    z-index: 1000;
+    color: var(--app-bar-text-color);
+    background-color: var(--app-bar-background);
+
+    a {
+        color: var(--app-bar-text-color);
+    }
+    &--fixed {
+        position: fixed;
+        top: 0;
+        left: auto;
+        right: 0;
+    }
+    &--absolute {
+        position: fixed;
+        top: 0;
+        left: auto;
+        right: 0;
+    }
+    &--sticky {
+        position: sticky;
+        top: 0;
+        left: auto;
+        right: 0;
+    }
+    &-brand {
+        display: inline-block;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+        line-height: inherit;
+        white-space: nowrap;
+    }
+}
+.s-button {
+
+}
+.s-sidebar {
+    max-width: 16%;
+}
+.s-nav {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+.s-nav-link {
+    display: block;
+    padding: .5rem 1rem;
+}
