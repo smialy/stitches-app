@@ -1,19 +1,15 @@
-import { h } from 'preact';
+import { h } from "preact";
 
 export default function List({ subheader, children }) {
     const className = `s-list`;
     return (
-      <ul class={className}>
+        <ul class={className}>
             {subheader}
             {children}
-      </ul>
+        </ul>
     );
 }
 
 List.Item = function ListItem({ children }) {
-    return (
-        <li>
-
-        </li>
-    )
-}
+    return <li></li>;
+};

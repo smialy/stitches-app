@@ -1,8 +1,8 @@
-import { h } from 'preact';
+import { h } from "preact";
 
 export default function Nav({ children, className, ...props }) {
     return (
-        <div { ...props } class={`s-nav ${className}`}>
+        <div {...props} class={`s-nav ${className}`}>
             {children}
         </div>
     );
@@ -10,9 +10,7 @@ export default function Nav({ children, className, ...props }) {
 Nav.Link = function NavLink({ url, children }) {
     return (
         <li class="s-nav-link">
-            <a href={url}>
-                {children}
-            </a>
+            <a href={url}>{children}</a>
         </li>
     );
-}
+};

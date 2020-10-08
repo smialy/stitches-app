@@ -1,18 +1,37 @@
 :root {
     --primary-color: #2196F3;
+    --text-color: #555;
 
     --app-bar-background: var(--primary-color);
     --app-bar-text-color: #fff;
 
     --app-menu-width: 300px;
 }
-
-.container {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: var(--app-menu-width) 1fr;
+body, html {
+    height: 100%;
+    color: var(--text-color);
 }
-
+#app
+ {
+    height: inherit;
+    display: grid;
+    grid-template-columns: var(--app-menu-width) auto;
+    grid-template-rows: 64px auto;
+    grid-template-areas:
+        "header header"
+        "sidebar main"
+    }
+#appbar {
+    grid-area: header;
+}
+#sidebar {
+    grid-area: sidebar;
+}
+#main {
+    grid-area: main;
+    background: #f6f9fa;
+    padding: 16px;
+}
 .flosses {
     display: flex;
     justify-content: flex-start;
@@ -21,23 +40,23 @@
 .floss {
     display: flex;
     width: 400px;
-    margin: 2px;
+    margin: 4px;
     padding: 4px;
     border: solid 1px #ddd;
     border-radius: 3px;
     overflow: hidden;
-    &-number {
+    &-identifier {
         width: 40px;
         text-align: center;
     }
     &-color {
         width: 30px;
         height: 30px;
-        margin: -4px;
+        margin: -4px 8px -4px -4px;
         border-left: 1px solid #ddd;
     }
     &-size {
-        width: 40px;
+        width: 20px;
     }
 }
 .floss-type {
@@ -48,4 +67,15 @@
 }
 .floss-name {
     flex-grow: 1;
+}
+
+.floss-import {
+    display: flex;
+
+    .editor {
+        flex: 1 1 auto;
+    }
+    .preview {
+        flex: 2 1 auto;
+    }
 }
