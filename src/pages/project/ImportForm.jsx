@@ -1,26 +1,40 @@
 import { h } from "preact";
 import { useState } from "preact/hooks";
 
-import { Flosses } from "./Flosses";
+// import { Flosses } from "./Flosses";
+import { TextField } from '../../ui/Form';
+import Button from "../../ui/Button";
 
 const HEAD_SIZE = 12;
 
-export function FlossImport({ onImport }) {
-    const [flosses, setFlosses] = useState([]);
+export default function ImportForm({ onImport }) {
     const [text, setText] = useState("");
-    const handleInput = value => setText(value);
-    const onAdd = () => {
+    const changeHandler = value => setText(value);
+    const importHandler = () => {
+        const flosses = uniqueFlosses(parse(text));
         onImport(flosses);
-        onReset();
+        setText('');
     };
-    const onReset = () => {
-        setFlosses([]);
-        setText("");
-    };
-    const importHandler = () => setFlosses(uniqueFlosses(parse(text)));
+    console.log({ text });
 
     return (
-        <div class="floss-import">
+        <div class="">
+            <TextField
+                placeholder="Insert text"
+                value={text}
+                onChange={changeHandler}
+                multiline
+                rows="6"
+                fullWidth
+            />
+            <Button
+                onClick={importHandler}
+                color="primary"
+                variant="contained"
+                disabled={!text}
+            >
+                Import
+            </Button>
         </div>
     );
 }
@@ -34,7 +48,6 @@ function parse(text) {
             type: row[0],
             identifier: row[1],
             quantity: row[11],
-            color: '#fff',
         }));
     }
 

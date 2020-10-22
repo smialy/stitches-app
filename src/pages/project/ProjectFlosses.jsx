@@ -1,100 +1,73 @@
 import { h } from "preact";
-import { useEffect, useReducer, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 import { useDatabase } from "../../hooks/db";
-import FlossImport from "../../common/FlossImport";
+import { Flosses } from "../../common/Flosses";
+import { FlossImport } from "../../common/FlossImport";
+import { DialogForm } from "../../ui/Dialog";
+import Drawer from "../../ui/Drawer";
 
-const initState = {
-    flosses: [],
-    loading: true,
-    error: "",
-    adding: false,
-};
-
-const reducer = (state, action) => {
-    const { type, payload } = action;
-    switch (type) {
-        case "init": {
-            const { flosses } = payload;
-            return { ...state, flosses, loading: false };
-        }
-        case "add-new":
-            return { ...state, adding: true };
-        case "cancel":
-            return { ...state, adding: false };
-        case "save": {
-            const { flosses } = payload;
-            return { ...state, flosses, adding: false };
-        }
-        case "reset": {
-            return { ...state, flosses: [], adding: false };
-        }
-        case "remove": {
-            const { skein } = payload;
-            const flosses = state.flosses.filter((s) => s.id !== skein.id);
-            return { ...state, flosses, adding: false };
-        }
-        default:
-            throw new Error(`Unexpected action: ${action.type}`);
-    }
-};
-
-export function ProjectFlosses({ id }) {
-    const [text, setText] = useState("");
-    const [{ flosses, loading, adding }, dispatch] = useReducer(reducer, initState);
+export function ProjectFlosses({ project }) {
+    const { id: projectId } = project;
     const db = useDatabase();
-
+    const [flosses, setFlosses] = useState([]);
     useEffect(() => {
-        db.getProjectFlosses(id)
-            .then((flosses) => {
-                // dispatch({ type: 'init', payload: { flosses }});
-            })
-            .catch((e) => {
-                console.log(e);
-                // dispatch({ type: 'init', payload: { skeins }});
-            });
+        db.getProjectFlosses(projectId).then(setFlosses);
     }, []);
-    // const addNew = () => dispatch({ type: 'add-new'});
-    // const save = () => {
-    //     let skeins = [];
-    //     if (text) {
-    //     }
-    //     dispatch({ type: 'save', payload: { skeins } });
-    // };
-    // const reset = () => dispatch({ type: 'reset' });
-    // const cancel = () => dispatch({ type: 'cancel' });
-    // const remove = skein => () => dispatch(({ type: 'remove', payload: { skein }}))
-    const setFlosses = (flosses) => dispatch({ type: "save", payload: { flosses } });
-    const changeHandler = ({ type, payload }) => dispatch({ type, payload });
+
+    const [showImportForm, setShowImportForm] = useState(false);
+    const importHandler = () => {
+        setShowImportForm(true);
+    };
+    const importChangeHandler = async imported => {
+        const buff = [];
+        for (const { type, identifier, quantity } of imported) {
+            // console.log({ type, identifier, quantity });
+            const floss = await db.findFloss(type, identifier);
+            if (floss) {
+                const { color, name, id: flossId } = floss;
+                buff.push({
+                    projectId,
+                    flossId,
+                    name,
+                    type,
+                    identifier,
+                    quantity,
+                    color,
+                    shortage: floss.quantity - quantity < 0,
+                });
+            } else {
+                console.warn(`Not found: ${type}: ${identifier}`);
+            }
+        }
+        db.addProjectFlosses(buff);
+        setFlosses(flosses.concat(buff));
+    }
     return (
         <div>
-            <h5>Flosses</h5>
-            <FlossImport flosses={flosses} onChange={changeHandler} />
+            <h2>Flosses</h2>
+            <button onClick={importHandler}>Import</button>
+x            {showImportForm && (
+                <Drawer onClose={() => setShowImportForm(false)} fixed>
+                    <FlossImport
+                        flosses={flosses}
+                        onChange={importChangeHandler}
+                    />
+                </Drawer>
+            )}
         </div>
     );
 }
 
-function Skein({ skein, onRemove }) {
-    return (
-        <div>
-            <span>{skein.id}</span>
-            <span>{skein.typeId}</span>
-            <span>{skein.projectId}</span>
-            <span> - {skein.size}</span>
-            <button onClick={onRemove(skein)}>x</button>
-        </div>
-    );
-}
-let sid = 0;
-function parseRows(text) {
-    return text
-        .trim()
-        .split("\n")
-        .map((line) => line.split(" "))
-        .map((item) => ({
-            id: (sid += 1),
-            typeId: `${item[0]} ${item[1]}`,
-            projectId: "",
-            size: item[11],
-        }));
+function uniqueBy(records, field) {
+    const buff = [];
+    return records.filter(record => {
+        const value = record[field];
+        if (!buff.includes(value)) {
+            buff.push(value);
+            return true;
+        }
+        return false;
+    });
+    return buff;
 }

@@ -4,7 +4,7 @@ export default function Breadcrumbs({ children }) {
     return (
         <div class="s-breadcrumbs">
             <ol>
-                {children.map((child) => (
+                {children.map(child => (
                     <li>{child}</li>
                 ))}
             </ol>

@@ -1,29 +1,38 @@
 export default class Projects {
     static entities() {
         return {
-            projects: "++id,name,createdAt",
-            projects_flosses: "++id,typeId,projectId,size",
+            project: "++id,name,status,createdAt",
+            project_floss: "++id,projectId,flossId,quantity",
         };
     }
     constructor(db) {
         this.db = db;
     }
     all() {
-        return this.db.projects.toArray();
+        return this.db.project.orderBy('createdAt').reverse().toArray();
     }
     get(id) {
-        return this.db.projects.get(id);
+        return this.db.project.get(id);
+    }
+    updateName(id, name) {
+        return this.db.project.update(id, { name });
     }
     async add(values) {
         const createdAt = new Date().getTime();
-        const id = await this.db.projects.add({ ...values, createdAt });
-        return await this.db.projects.get(id);
+        const status = 'INIT';
+        const id = await this.db.project.add({ ...values, status, createdAt });
+        return await this.db.project.get(id);
     }
-    remove(id) {
-        return this.db.projects.delete(id);
+    async remove(id) {
+        await this.db.project.delete(id);
+        await this.db.project_floss.where({ projectId: id }).delete();
     }
     async getFlosses(id) {
-        const rows = await this.db.projects_flosses.where({ projectId: id }).toArray();
-        return rows.map((row) => row.flossId);
+        return this.db.project_floss.where({ projectId: id }).toArray();
+
+    }
+    async addFloss(floss) {
+        return this.db.project_floss.add(toFloss(floss));
     }
 }
+const toFloss = ({ flossId, projectId, quantity}) => ({ flossId, projectId, quantity });

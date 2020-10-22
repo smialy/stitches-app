@@ -1,0 +1,24 @@
+.order-list {
+    .order {
+        margin: 0 0 24px 0;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        background: #fff;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+
+        .name {
+            font-size: 1.3rem;
+        }
+        .body {
+            flex-grow: 1;
+            cursor: pointer;
+            padding: 24px;
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            margin: 0 32px 0 0;
+        }
+    }
+}

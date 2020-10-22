@@ -1,6 +1,5 @@
-import { h, Fragment } from "preact";
+import { h } from "preact";
 import { useEffect, useReducer, useState } from "preact/hooks";
-import { Link, route } from "preact-router";
 
 import { useDatabase } from "../../hooks/db";
 import Page from '../../ui/Page';
@@ -12,7 +11,7 @@ import Button from "../../ui/Button";
 import { Flosses } from "../../common/Flosses";
 
 const initState = {
-    project: {},
+    order: {},
     flosses: [],
     loading: true,
     error: "",
@@ -21,14 +20,15 @@ const initState = {
 };
 
 const reducer = makeReducer({
-    projectLoaded: ({ project }) => ({ project, loading: false }),
+    orderLoaded: ({ order }) => ({ order, loading: false }),
     loadError: ({ error }) => ({ loading: false, error }),
     flossesLoaded: ({ flosses }) => ({ flosses }),
     showAddForm: () => ({ showAddForm: true }),
     showImportForm: () => ({ showImportForm: true }),
     hideForm: () => ({ showAddForm: false, showImportForm: false }),
     flossesUpdated: ({ flosses }) => ({ flosses }),
-    addFloss: ({ floss }, { flosses }) => ({ flosses: flosses.concat([floss])})
+    addFloss: ({ floss }, { flosses }) => ({ flosses: flosses.concat([floss])}),
+    updateFloss: ({ floss }, { flosses }) => ({ flosses: flosses.map(f => f.id === floss.id ? floss : f)})
 });
 
 function makeReducer(config) {
@@ -41,25 +41,24 @@ function makeReducer(config) {
     };
 }
 
-export default function ProjectPage({ matches: { sid } }) {
+export default function OrderPage({ matches: { sid } }) {
     const [{
-        project,
+        order,
         flosses,
         loading,
         showImportForm,
         showAddForm,
         error
     }, dispatch] = useReducer(reducer, initState);
+
     const db = useDatabase();
-
     useEffect(() => {
-        db.getProject(parseInt(sid, 10))
-            .then(project => {
-                if (project) {
-                    dispatch({ type: "projectLoaded", payload: { project } });
-                    db.getProjectFlosses(project.id).then(flosses => {
+        db.order.get(parseInt(sid, 10))
+            .then(order => {
+                if (order) {
+                    dispatch({ type: "orderLoaded", payload: { order } });
+                    db.getOrderFlosses(order.id).then(flosses => {
                         dispatch({ type: "flossesLoaded", payload: { flosses } });
-
                     });
                 } else {
                     dispatch({ type: "loadError", payload: `Not found project: ${sid}` });
@@ -67,15 +66,9 @@ export default function ProjectPage({ matches: { sid } }) {
             })
             .catch(e => {
                 console.error(e);
-                route("/projects");
+                route("/orders");
             });
     }, []);
-    if (loading) {
-        return "Loading...";
-    }
-    if (error) {
-        return error;
-    }
     const addHandler = () => dispatch({ type: "showAddForm" });
     const importHandler = () => dispatch({ type: "showImportForm" });
     const hideForm = () => dispatch({ type: 'hideForm'});
@@ -87,32 +80,35 @@ export default function ProjectPage({ matches: { sid } }) {
     const addFloss = async ({ type, identifier, quantity }) => {
         const floss = await db.findFloss(type, identifier);
         if (floss) {
-            const { color, name, id: flossId } = floss;
-            const record = {
-                projectId: project.id,
-                flossId,
-                name,
-                type,
-                identifier,
-                quantity,
-                color,
-                shortage: floss.quantity - quantity < 0,
-            };
-            db.addProjectFloss(record);
-            dispatch({ type: "addFloss", payload: { floss: record } });
+            const orderFloss = await db.order.findFloss(order.id, floss.id);
+            if (orderFloss) {
+                const q = parseInt(orderFloss.quantity, 10) + quantity
+                await db.order.updateFloss(orderFloss.id, q);
+                dispatch({ type: 'updateFloss', payload: { floss: {...floss, ...orderFloss, quantity: q} }});
+            } else {
+                const { color, name, id: flossId } = floss;
+                const record = {
+                    orderId: order.id,
+                    flossId,
+                    name,
+                    type,
+                    identifier,
+                    quantity,
+                    color,
+                    shortage: floss.quantity - quantity < 0,
+                };
+                db.order.addFloss(record);
+                dispatch({ type: "addFloss", payload: { floss: record } });
+            }
         } else {
             console.warn(`Not found: ${type}: ${identifier}`);
         }
     }
-    const updateName = name => {
-        db.updateProjectName(project.id, name).then(project => {
-            dispatch({ type: "projectLoaded", payload: { project } });
-        });
-    };
+    const { Header, Body } = Page;
     return (
-        <Page>
-            <Page.Header>
-                Project: <EditName name={project.name} onUpdate={updateName} />
+        <Page name="orders-page">
+            <Header>
+                Order
                 <Page.Header.Action
                     label="Add"
                     icon={<Icons.AddCicle />}
@@ -123,75 +119,30 @@ export default function ProjectPage({ matches: { sid } }) {
                     icon={<Icons.AddCicle />}
                     onClick={importHandler}
                 />
-            </Page.Header>
-            <Page.Body>
-                <Flosses flosses={flosses} />
-            </Page.Body>
-            {showImportForm && (
-                <Drawer onClose={hideForm} header="Import flosses" fixed>
-                    <ImportForm onImport={importChangeHandler} onClose={hideForm} />
-                </Drawer>
-            )}
-            {showAddForm && (
-                <Drawer onClose={hideForm} header="Add floss" fixed>
-                    <AddForm onAdd={addFloss} onClose={hideForm} />
-                </Drawer>
-            )}
+            </Header>
+            <Body>
+                {loading && "Loading..."}
+                {!loading && <Flosses flosses={flosses} />}
+                {showImportForm && (
+                    <Drawer onClose={hideForm} header="Import flosses" fixed>
+                        <ImportForm onImport={importChangeHandler} onClose={hideForm} />
+                    </Drawer>
+                )}
+                {showAddForm && (
+                    <Drawer onClose={hideForm} header="Add floss" fixed>
+                        <AddForm onAdd={addFloss} onClose={hideForm} />
+                    </Drawer>
+                )}
+            </Body>
         </Page>
     );
 }
 
-function EditName({ name, onUpdate }) {
-    const [mode, setMode] = useState('view');
-    const [value, setValue] = useState('');
-    const isView = mode === 'view';
-    const isEdit = mode === 'edit';
-    const isValid = !!value.trim();
-    const editHandler = () => {
-        setMode('edit');
-    }
-    const saveHandler = () => {
-        if (isValid) {
-            onUpdate(value);
-            setMode('view');
-        }
-    }
-    useEffect(() => {
-        setValue(name);
-    }, [name]);
-    return (
-        <Fragment>
-            {isView && (<span className="editable" onClick={editHandler}>{name}</span>)}
-            {isEdit && (
-                <Fragment>
-                    <TextField
-                        value={value}
-                        onChange={setValue}
-                        valid={isValid}
-                        onKeyDown={e => {
-                            if (e.key === "Enter") {
-                                saveHandler();
-                            }
-                        }}
-                        focus
-                    />
-                    <Button
-                        color="primary"
-                        variant="contained"
-                        disabled={!isValid}
-                        onClick={saveHandler}
-                    >Save</Button>
-                </Fragment>
-            )}
-        </Fragment>
-    );
-}
 const ADD_INIT_STATE = {
     type: 'DMC',
     identifier: '',
     quantity: 1,
 };
-
 function AddForm({ onAdd, onClose }) {
     const type = 'DMC';
     const [values, setValues] = useState(ADD_INIT_STATE);

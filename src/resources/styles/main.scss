@@ -1,0 +1,137 @@
+body, html {
+    height: 100%;
+    color: var(--text-color);
+}
+
+#app {
+    height: inherit;
+    display: grid;
+    grid-template-columns: var(--app-menu-width) auto;
+    grid-template-rows: 64px auto;
+    grid-template-areas:
+        "header header"
+        "sidebar main";
+
+}
+#appbar {
+    grid-area: header;
+}
+#sidebar {
+    grid-area: sidebar;
+}
+#main {
+    grid-area: main;
+    background: #f3f3f3;
+}
+.flosses {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+}
+.floss {
+    display: flex;
+    width: 400px;
+    margin: 4px;
+    padding: 4px;
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    &-identifier {
+        width: 40px;
+        text-align: center;
+    }
+    &-color {
+        width: 30px;
+        height: 30px;
+        margin: -4px 8px -4px -4px;
+        border-left: 1px solid #ddd;
+    }
+    &-quantity {
+        min-width: 20px;
+    }
+    &-actions {
+        border-left: solid 1px #ddd;
+        margin: -4px 0 -4px 8px;
+    }
+    &--readonly {
+        cursor: none;
+    }
+    &--shortage {
+        .floss-quantity {
+            color: #f00;
+            font-weight: bold;
+        }
+    }
+}
+.floss-type {
+
+}
+.floss,
+.floss-color {
+}
+.floss-name {
+    flex-grow: 1;
+}
+
+.floss-import {
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+    width: 860px;
+
+    .editor {
+        flex: 1 1 auto;
+        textarea {
+            width: 400px;
+            height: 200px;
+        }
+    }
+    .preview {
+        flex: 2 1 auto;
+        overflow: auto;
+    }
+}
+
+.projects-page {
+
+}
+.projects-list {
+    .project {
+        margin: 0 0 24px 0;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        background: #fff;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+
+        .name {
+            font-size: 1.3rem;
+        }
+        .body {
+            flex-grow: 1;
+            cursor: pointer;
+            padding: 24px;
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            margin: 0 32px 0 0;
+        }
+    }
+}
+.floss-edit-form {
+    .form {
+        margin: 16px 0 0;
+        text-align: center;
+    }
+}
+.editable {
+    cursor: text;
+    &:hover {
+        outline: solid 1px #ddd;
+    }
+}

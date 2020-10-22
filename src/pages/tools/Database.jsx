@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { useState } from "preact/hooks";
 import { useDatabase } from "../../hooks/db";
-import dmc from "../../dmc.csv";
+import dmc from "../../resources/dmc.csv";
 
 export default function Database() {
     const { db } = useDatabase();
@@ -14,39 +14,39 @@ export default function Database() {
         }
         setLoading(true);
         (async function () {
-            const clean = (txt) => txt.replace(/^"|"$/g, "");
-            const data = await fetch(dmc).then((res) => res.text());
+            const clean = txt => txt.replace(/^"|"$/g, "");
+            const data = await fetch(dmc).then(res => res.text());
             const flosses = data
                 .split("\n")
-                .map((line) => line.split(","))
-                .map((row) => ({
+                .map(line => line.split(","))
+                .map(row => ({
                     sid: `DMC:${row[0]}`,
                     type: "DMC",
                     identifier: row[0],
                     name: clean(row[1]),
                     color: clean(row[2]),
-                    size: 0,
+                    quantity: 1,
                 }));
-            await db.flosses.clear();
-            await db.projects.clear();
-            await db.flosses.bulkAdd(flosses);
+            await db.floss.clear();
+            await db.project.clear();
+            await db.floss.bulkAdd(flosses);
             setLoading(false);
         })();
     };
     const exportDatabase = () => {
         (async function () {
-            const flosses = await db.flosses.toArray();
-            const projects = await db.projects.toArray();
+            const flosses = await db.floss.toArray();
+            const projects = await db.project.toArray();
             const payload = JSON.stringify({ flosses, projects }, null, 2);
             const data = new Blob([payload], { type: "application/json" });
             const url = URL.createObjectURL(data);
             setDownloadUrl(url);
         })();
     };
-    const uploadDump = (e) => {
+    const uploadDump = e => {
         const input = e.target;
         const reader = new FileReader();
-        reader.addEventListener("load", (e) => {
+        reader.addEventListener("load", e => {
             try {
                 insertData(JSON.parse(reader.result));
             } catch (e) {
@@ -56,10 +56,10 @@ export default function Database() {
         reader.readAsText(input.files[0]);
     };
     const insertData = async ({ flosses, projects }) => {
-        await db.flosses.clear();
-        await db.projects.clear();
-        await db.flosses.bulkAdd(flosses);
-        await db.projects.bulkAdd(projects);
+        await db.floss.clear();
+        await db.project.clear();
+        await db.floss.bulkAdd(flosses);
+        await db.project.bulkAdd(projects);
     };
 
     return (

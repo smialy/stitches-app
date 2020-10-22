@@ -4,7 +4,7 @@ import { useState } from "preact/hooks";
 export function Tabs({ children, ...props }) {
     const [current, setCurrent] = useState(0);
     const isActiveClass = "s-tabs--active";
-    const onClick = (index, tab) => (e) => {
+    const onClick = (index, tab) => e => {
         console.log({ index, tab });
         setCurrent(index);
     };
