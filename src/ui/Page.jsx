@@ -1,12 +1,12 @@
 import { h, toChildArray } from "preact";
 import Button from "../ui/Button";
 
-export default function Page({ name="default", children }) {
+export default function Page({ name = "default", children }) {
     return (
         <div class="s-page" data-name={name}>
             {children}
         </div>
-    )
+    );
 }
 
 const isTitle = node => node.type === Page.Header.Title;
@@ -32,7 +32,7 @@ Page.Header = ({ children }) => {
         break;
     }
     if (labels.length === 1) {
-        if (typeof labels[0] === 'string') {
+        if (typeof labels[0] === "string") {
             title = <Page.Header.Title>{labels[0]}</Page.Header.Title>;
         }
     } else if (labels.length > 1) {
@@ -49,33 +49,16 @@ Page.Header = ({ children }) => {
     );
 };
 
-Page.Header.Title = ({ children }) => (
-    <h1 class="title">
-        {children}
-    </h1>
-);
+Page.Header.Title = ({ children }) => <h1 class="title">{children}</h1>;
 
 Page.Header.Actions = ({ children }) => {
-    return (
-        <div class="actions">
-            {children}
-        </div>
-    );
+    return <div class="actions">{children}</div>;
 };
 
 Page.Header.Action = ({ label, icon, primary, onClick, children }) => (
-    <Button
-        className="action"
-        onClick={onClick}
-        prefix={icon}
-        variant="contained"
-    >
+    <Button className="action" onClick={onClick} prefix={icon} variant="contained">
         {label ? label : children}
     </Button>
 );
 
-Page.Body = ({ children }) => (
-    <div className="s-page-body">
-        {children}
-    </div>
-);
+Page.Body = ({ children }) => <div className="s-page-body">{children}</div>;

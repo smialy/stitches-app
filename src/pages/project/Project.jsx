@@ -1,13 +1,13 @@
 import { h, Fragment } from "preact";
 import { useEffect, useReducer, useState } from "preact/hooks";
-import { Link, route } from "preact-router";
+import { route } from "preact-router";
 
 import { useDatabase } from "../../hooks/db";
-import Page from '../../ui/Page';
-import Icons from '../../ui/Icons';
+import Page from "../../ui/Page";
+import Icons from "../../ui/Icons";
 import ImportForm from "./ImportForm";
 import Drawer from "../../ui/Drawer";
-import { TextField } from '../../ui/Form';
+import { TextField } from "../../ui/Form";
 import Button from "../../ui/Button";
 import { Flosses } from "../../common/Flosses";
 
@@ -28,28 +28,24 @@ const reducer = makeReducer({
     showImportForm: () => ({ showImportForm: true }),
     hideForm: () => ({ showAddForm: false, showImportForm: false }),
     flossesUpdated: ({ flosses }) => ({ flosses }),
-    addFloss: ({ floss }, { flosses }) => ({ flosses: flosses.concat([floss])})
+    addFloss: ({ floss }, { flosses }) => ({ flosses: flosses.concat([floss]) }),
 });
 
 function makeReducer(config) {
     return (state, action) => {
         const { type, payload } = action;
         if (config[type]) {
-            return {...state, ...config[type](payload, state)};
+            return { ...state, ...config[type](payload, state) };
         }
         console.warn(`Unexpected action: ${type}`);
     };
 }
 
 export default function ProjectPage({ matches: { sid } }) {
-    const [{
-        project,
-        flosses,
-        loading,
-        showImportForm,
-        showAddForm,
-        error
-    }, dispatch] = useReducer(reducer, initState);
+    const [
+        { project, flosses, loading, showImportForm, showAddForm, error },
+        dispatch,
+    ] = useReducer(reducer, initState);
     const db = useDatabase();
 
     useEffect(() => {
@@ -59,7 +55,6 @@ export default function ProjectPage({ matches: { sid } }) {
                     dispatch({ type: "projectLoaded", payload: { project } });
                     db.getProjectFlosses(project.id).then(flosses => {
                         dispatch({ type: "flossesLoaded", payload: { flosses } });
-
                     });
                 } else {
                     dispatch({ type: "loadError", payload: `Not found project: ${sid}` });
@@ -78,7 +73,7 @@ export default function ProjectPage({ matches: { sid } }) {
     }
     const addHandler = () => dispatch({ type: "showAddForm" });
     const importHandler = () => dispatch({ type: "showImportForm" });
-    const hideForm = () => dispatch({ type: 'hideForm'});
+    const hideForm = () => dispatch({ type: "hideForm" });
     const importChangeHandler = async imported => {
         for (const record of imported) {
             await addFloss(record);
@@ -103,21 +98,34 @@ export default function ProjectPage({ matches: { sid } }) {
         } else {
             console.warn(`Not found: ${type}: ${identifier}`);
         }
-    }
+    };
     const updateName = name => {
         db.updateProjectName(project.id, name).then(project => {
             dispatch({ type: "projectLoaded", payload: { project } });
         });
+    };
+    const orderHandler = async () => {
+        const records = flosses
+            .filter(floss => floss.shortage)
+            .map(({ flossId, quantity }) => {
+                return {
+                    flossId,
+                    quantity,
+                };
+            });
+        const order = await db.createOrder(records);
+        route(`/order/${order.id}`);
     };
     return (
         <Page>
             <Page.Header>
                 Project: <EditName name={project.name} onUpdate={updateName} />
                 <Page.Header.Action
-                    label="Add"
+                    label="Order"
                     icon={<Icons.AddCicle />}
-                    onClick={addHandler}
+                    onClick={orderHandler}
                 />
+                <Page.Header.Action label="Add" icon={<Icons.AddCicle />} onClick={addHandler} />
                 <Page.Header.Action
                     label="Import"
                     icon={<Icons.AddCicle />}
@@ -142,26 +150,30 @@ export default function ProjectPage({ matches: { sid } }) {
 }
 
 function EditName({ name, onUpdate }) {
-    const [mode, setMode] = useState('view');
-    const [value, setValue] = useState('');
-    const isView = mode === 'view';
-    const isEdit = mode === 'edit';
+    const [mode, setMode] = useState("view");
+    const [value, setValue] = useState("");
+    const isView = mode === "view";
+    const isEdit = mode === "edit";
     const isValid = !!value.trim();
     const editHandler = () => {
-        setMode('edit');
-    }
+        setMode("edit");
+    };
     const saveHandler = () => {
         if (isValid) {
             onUpdate(value);
-            setMode('view');
+            setMode("view");
         }
-    }
+    };
     useEffect(() => {
         setValue(name);
     }, [name]);
     return (
         <Fragment>
-            {isView && (<span className="editable" onClick={editHandler}>{name}</span>)}
+            {isView && (
+                <span className="editable" onClick={editHandler}>
+                    {name}
+                </span>
+            )}
             {isEdit && (
                 <Fragment>
                     <TextField
@@ -180,20 +192,22 @@ function EditName({ name, onUpdate }) {
                         variant="contained"
                         disabled={!isValid}
                         onClick={saveHandler}
-                    >Save</Button>
+                    >
+                        Save
+                    </Button>
                 </Fragment>
             )}
         </Fragment>
     );
 }
 const ADD_INIT_STATE = {
-    type: 'DMC',
-    identifier: '',
+    type: "DMC",
+    identifier: "",
     quantity: 1,
 };
 
 function AddForm({ onAdd, onClose }) {
-    const type = 'DMC';
+    const type = "DMC";
     const [values, setValues] = useState(ADD_INIT_STATE);
     const [errors, setErrors] = useState({});
     const addHandler = () => {
@@ -207,23 +221,18 @@ function AddForm({ onAdd, onClose }) {
         setErrors({});
     };
     const onChange = name => value => {
-        setErrors({ ...errors, [name]: value ? false : 'empty' });
+        setErrors({ ...errors, [name]: value ? false : "empty" });
         setValues({ ...values, [name]: value });
     };
     const invalid = Object.values(errors).every(value => !!value);
     return (
         <div class="floss-add-form">
-            <TextField
-                label="Type"
-                value={type}
-                disabled
-                fullWidth
-            />
+            <TextField label="Type" value={type} disabled fullWidth />
             <TextField
                 label="Identifier"
                 value={values.identifier}
                 invalid={errors.identifier}
-                onChange={onChange('identifier')}
+                onChange={onChange("identifier")}
                 focus
                 fullWidth
             />
@@ -231,16 +240,11 @@ function AddForm({ onAdd, onClose }) {
                 label="Quantity"
                 value={values.quantity}
                 invalid={errors.quantity}
-                onChange={onChange('quantity')}
+                onChange={onChange("quantity")}
                 fullWidth
             />
             <Button.Line>
-                <Button
-                    onClick={addHandler}
-                    color="primary"
-                    variant="contained"
-                    disabled={invalid}
-                >
+                <Button onClick={addHandler} color="primary" variant="contained" disabled={invalid}>
                     Save
                 </Button>
                 <Button

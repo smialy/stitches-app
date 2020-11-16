@@ -2,7 +2,7 @@ import { h } from "preact";
 import { useState } from "preact/hooks";
 
 // import { Flosses } from "./Flosses";
-import { TextField } from '../../ui/Form';
+import { TextField } from "../../ui/Form";
 import Button from "../../ui/Button";
 
 const HEAD_SIZE = 12;
@@ -13,7 +13,7 @@ export default function ImportForm({ onImport }) {
     const importHandler = () => {
         const flosses = uniqueFlosses(parse(text));
         onImport(flosses);
-        setText('');
+        setText("");
     };
     console.log({ text });
 
@@ -27,12 +27,7 @@ export default function ImportForm({ onImport }) {
                 rows="6"
                 fullWidth
             />
-            <Button
-                onClick={importHandler}
-                color="primary"
-                variant="contained"
-                disabled={!text}
-            >
+            <Button onClick={importHandler} color="primary" variant="contained" disabled={!text}>
                 Import
             </Button>
         </div>
@@ -77,7 +72,7 @@ function uniqueBy(records, field) {
 }
 
 function uniqueFlosses(flosses) {
-    return uniqueBy(flosses, 'sid');
+    return uniqueBy(flosses, "sid");
 }
 
 function flossHash(floss) {

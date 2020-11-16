@@ -3,10 +3,9 @@ import Project from "./project";
 import Floss from "./floss";
 import Order from "./order";
 
-
 const NAME = "StichesDBv1";
 
-const VERSION = 3;
+const VERSION = 1;
 
 class StorageDao {
     constructor(db) {
@@ -67,11 +66,28 @@ class StorageDao {
         }, {});
         return orderFlosses.map(floss => {
             const main = flossesMap[floss.flossId];
-            const shortage = 0;//main.quantity - floss.quantity < 0;
+            const shortage = false;
             return { ...main, ...floss, shortage };
         });
     }
+    async createOrder(records) {
+        const fids = records.map(row => row.flossId);
+        const flosses = await this.floss.bulkGet(fids);
+        const flossesMap = flosses.reduce((acc, floss) => {
+            acc[floss.id] = floss;
+            return acc;
+        }, {});
 
+        const order = await this.order.create();
+        for (const { flossId, quantity } of records) {
+            await this.order.addFloss({
+                orderId: order.id,
+                flossId,
+                quantity: Math.ceil(quantity - flossesMap[flossId].quantity),
+            });
+        }
+        return order;
+    }
 }
 
 export function createDatabase() {

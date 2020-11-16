@@ -3,11 +3,11 @@ import { useEffect, useReducer, useState } from "preact/hooks";
 import { route } from "preact-router";
 // import Portal from 'preact-portal';
 
-import { formatDate } from '../../utils/date';
+import { formatDate } from "../../utils/date";
 import { useDatabase } from "../../hooks/db";
 import Icons from "../../ui/Icons";
-import Page from '../../ui/Page';
-import { TextField } from '../../ui/Form';
+import Page from "../../ui/Page";
+import { TextField } from "../../ui/Form";
 import Drawer from "../../ui/Drawer";
 import Button from "../../ui/Button";
 import Dialog from "../../ui/Dialog";
@@ -72,8 +72,7 @@ export default function ProjectsPage() {
         });
     }, []);
     const addProject = name => {
-        db
-            .addProject({ name })
+        db.addProject({ name })
             .then(project => {
                 dispatch({ name: "add", payload: project });
             })
@@ -84,8 +83,7 @@ export default function ProjectsPage() {
     };
     const removeConfirmHandler = () => {
         const { id } = current;
-        db
-            .removeProject(id)
+        db.removeProject(id)
             .then(() => {
                 dispatch({ name: "remove-confirmed", payload: { id } });
             })
@@ -132,7 +130,6 @@ export default function ProjectsPage() {
         </Page>
     );
 }
-
 
 function Project({ project, onRemove }) {
     const { id, name } = project;
@@ -194,19 +191,12 @@ function AddProjectForm({ onAction }) {
 }
 
 function RemoveConfirm({ project, onAction }) {
-    console.log(Dialog, Dialog.Content)
     return (
         <Dialog onClose={() => onAction({ name: "cancel-remove" })}>
-            <Dialog.Content>
-                Do you want remove: {project.name}
-            </Dialog.Content>
+            <Dialog.Content>Do you want remove: {project.name}</Dialog.Content>
             <Dialog.Footer>
-                <Button onClick={() => onAction({ name: "confirm-remove" })}>
-                    Confirm
-                </Button>
-                <Button onClick={() => onAction({ name: "cancel-remove" })}>
-                    Cancel
-                </Button>
+                <Button onClick={() => onAction({ name: "confirm-remove" })}>Confirm</Button>
+                <Button onClick={() => onAction({ name: "cancel-remove" })}>Cancel</Button>
             </Dialog.Footer>
         </Dialog>
     );

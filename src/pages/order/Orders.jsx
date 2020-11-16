@@ -2,10 +2,10 @@ import { h } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { route } from "preact-router";
 
-import { formatDate } from '../../utils/date';
+import { formatDate } from "../../utils/date";
 import { useDatabase } from "../../hooks/db";
 import Icons from "../../ui/Icons";
-import Page from '../../ui/Page';
+import Page from "../../ui/Page";
 import Button from "../../ui/Button";
 
 export default function OrdersPage() {
@@ -17,7 +17,8 @@ export default function OrdersPage() {
         db.order.all().then(orders => {
             setOrders(orders);
             setLoading(false);
-        })}, []);
+        });
+    }, []);
 
     const addOrderHandler = () => {
         db.order.create().then(order => {
@@ -44,9 +45,8 @@ export default function OrdersPage() {
             <Body>
                 <div className="order-list">
                     {loading && "Loading..."}
-                    {!loading && orders.map(order => (
-                        <Order order={order} onRemove={removeHandler} />
-                    ))}
+                    {!loading &&
+                        orders.map(order => <Order order={order} onRemove={removeHandler} />)}
                 </div>
             </Body>
         </Page>

@@ -2,12 +2,13 @@ import { h } from "preact";
 import { useEffect, useReducer, useState } from "preact/hooks";
 
 import { useDatabase } from "../../hooks/db";
-import Page from '../../ui/Page';
-import Icons from '../../ui/Icons';
+import Page from "../../ui/Page";
+import Icons from "../../ui/Icons";
 import ImportForm from "./ImportForm";
 import Drawer from "../../ui/Drawer";
-import { TextField } from '../../ui/Form';
+import { TextField } from "../../ui/Form";
 import Button from "../../ui/Button";
+import Dialog from "../../ui/Dialog";
 import { Flosses } from "../../common/Flosses";
 
 const initState = {
@@ -17,6 +18,7 @@ const initState = {
     error: "",
     showAddForm: false,
     showImportForm: false,
+    showExportForm: false,
 };
 
 const reducer = makeReducer({
@@ -25,35 +27,35 @@ const reducer = makeReducer({
     flossesLoaded: ({ flosses }) => ({ flosses }),
     showAddForm: () => ({ showAddForm: true }),
     showImportForm: () => ({ showImportForm: true }),
-    hideForm: () => ({ showAddForm: false, showImportForm: false }),
+    hideForm: () => ({ showAddForm: false, showImportForm: false, showExportForm: false }),
     flossesUpdated: ({ flosses }) => ({ flosses }),
-    addFloss: ({ floss }, { flosses }) => ({ flosses: flosses.concat([floss])}),
-    updateFloss: ({ floss }, { flosses }) => ({ flosses: flosses.map(f => f.id === floss.id ? floss : f)})
+    addFloss: ({ floss }, { flosses }) => ({ flosses: flosses.concat([floss]) }),
+    updateFloss: ({ floss }, { flosses }) => ({
+        flosses: flosses.map(f => (f.id === floss.id ? floss : f)),
+    }),
+    showExportForm: () => ({ showExportForm: true }),
 });
 
 function makeReducer(config) {
     return (state, action) => {
         const { type, payload } = action;
         if (config[type]) {
-            return {...state, ...config[type](payload, state)};
+            return { ...state, ...config[type](payload, state) };
         }
         console.warn(`Unexpected action: ${type}`);
     };
 }
 
 export default function OrderPage({ matches: { sid } }) {
-    const [{
-        order,
-        flosses,
-        loading,
-        showImportForm,
-        showAddForm,
-        error
-    }, dispatch] = useReducer(reducer, initState);
+    const [
+        { order, flosses, loading, showExportForm, showImportForm, showAddForm, error },
+        dispatch,
+    ] = useReducer(reducer, initState);
 
     const db = useDatabase();
     useEffect(() => {
-        db.order.get(parseInt(sid, 10))
+        db.order
+            .get(parseInt(sid, 10))
             .then(order => {
                 if (order) {
                     dispatch({ type: "orderLoaded", payload: { order } });
@@ -71,7 +73,7 @@ export default function OrderPage({ matches: { sid } }) {
     }, []);
     const addHandler = () => dispatch({ type: "showAddForm" });
     const importHandler = () => dispatch({ type: "showImportForm" });
-    const hideForm = () => dispatch({ type: 'hideForm'});
+    const hideForm = () => dispatch({ type: "hideForm" });
     const importChangeHandler = async imported => {
         for (const record of imported) {
             await addFloss(record);
@@ -82,9 +84,12 @@ export default function OrderPage({ matches: { sid } }) {
         if (floss) {
             const orderFloss = await db.order.findFloss(order.id, floss.id);
             if (orderFloss) {
-                const q = parseInt(orderFloss.quantity, 10) + quantity
+                const q = parseInt(orderFloss.quantity, 10) + quantity;
                 await db.order.updateFloss(orderFloss.id, q);
-                dispatch({ type: 'updateFloss', payload: { floss: {...floss, ...orderFloss, quantity: q} }});
+                dispatch({
+                    type: "updateFloss",
+                    payload: { floss: { ...floss, ...orderFloss, quantity: q } },
+                });
             } else {
                 const { color, name, id: flossId } = floss;
                 const record = {
@@ -103,17 +108,21 @@ export default function OrderPage({ matches: { sid } }) {
         } else {
             console.warn(`Not found: ${type}: ${identifier}`);
         }
-    }
+    };
+    const exportHandler = () => {
+        dispatch({ type: "showExportForm" });
+    };
     const { Header, Body } = Page;
     return (
         <Page name="orders-page">
             <Header>
                 Order
                 <Page.Header.Action
-                    label="Add"
+                    label="Export"
                     icon={<Icons.AddCicle />}
-                    onClick={addHandler}
+                    onClick={exportHandler}
                 />
+                <Page.Header.Action label="Add" icon={<Icons.AddCicle />} onClick={addHandler} />
                 <Page.Header.Action
                     label="Import"
                     icon={<Icons.AddCicle />}
@@ -133,18 +142,35 @@ export default function OrderPage({ matches: { sid } }) {
                         <AddForm onAdd={addFloss} onClose={hideForm} />
                     </Drawer>
                 )}
+                {showExportForm && <ExportForm flosses={flosses} onClose={hideForm} />}
             </Body>
         </Page>
     );
 }
 
+function ExportForm({ flosses, onClose }) {
+    const text = flosses.map(floss => `${floss.identifier} x ${floss.quantity}`).join("\n");
+    return (
+        <Dialog onClose={onClose}>
+            <Dialog.Content>
+                <TextField multiline fullWidth>
+                    {text}
+                </TextField>
+            </Dialog.Content>
+            <Dialog.Footer>
+                <Button onClick={onClose}>Close</Button>
+            </Dialog.Footer>
+        </Dialog>
+    );
+}
+
 const ADD_INIT_STATE = {
-    type: 'DMC',
-    identifier: '',
+    type: "DMC",
+    identifier: "",
     quantity: 1,
 };
 function AddForm({ onAdd, onClose }) {
-    const type = 'DMC';
+    const type = "DMC";
     const [values, setValues] = useState(ADD_INIT_STATE);
     const [errors, setErrors] = useState({});
     const addHandler = () => {
@@ -158,23 +184,18 @@ function AddForm({ onAdd, onClose }) {
         setErrors({});
     };
     const onChange = name => value => {
-        setErrors({ ...errors, [name]: value ? false : 'empty' });
+        setErrors({ ...errors, [name]: value ? false : "empty" });
         setValues({ ...values, [name]: value });
     };
     const invalid = Object.values(errors).every(value => !!value);
     return (
         <div class="floss-add-form">
-            <TextField
-                label="Type"
-                value={type}
-                disabled
-                fullWidth
-            />
+            <TextField label="Type" value={type} disabled fullWidth />
             <TextField
                 label="Identifier"
                 value={values.identifier}
                 invalid={errors.identifier}
-                onChange={onChange('identifier')}
+                onChange={onChange("identifier")}
                 focus
                 fullWidth
             />
@@ -182,16 +203,11 @@ function AddForm({ onAdd, onClose }) {
                 label="Quantity"
                 value={values.quantity}
                 invalid={errors.quantity}
-                onChange={onChange('quantity')}
+                onChange={onChange("quantity")}
                 fullWidth
             />
             <Button.Line>
-                <Button
-                    onClick={addHandler}
-                    color="primary"
-                    variant="contained"
-                    disabled={invalid}
-                >
+                <Button onClick={addHandler} color="primary" variant="contained" disabled={invalid}>
                     Save
                 </Button>
                 <Button

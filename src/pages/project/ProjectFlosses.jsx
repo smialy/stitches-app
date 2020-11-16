@@ -42,17 +42,14 @@ export function ProjectFlosses({ project }) {
         }
         db.addProjectFlosses(buff);
         setFlosses(flosses.concat(buff));
-    }
+    };
     return (
         <div>
             <h2>Flosses</h2>
-            <button onClick={importHandler}>Import</button>
-x            {showImportForm && (
+            <button onClick={importHandler}>Import</button>x{" "}
+            {showImportForm && (
                 <Drawer onClose={() => setShowImportForm(false)} fixed>
-                    <FlossImport
-                        flosses={flosses}
-                        onChange={importChangeHandler}
-                    />
+                    <FlossImport flosses={flosses} onChange={importChangeHandler} />
                 </Drawer>
             )}
         </div>

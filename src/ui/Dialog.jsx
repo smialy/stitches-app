@@ -1,8 +1,8 @@
 import { h } from "preact";
 import { useEffect } from "preact/hooks";
 import Portal from "./Portal";
-import Button from './Button';
-import Overlay from './Overlay';
+import Button from "./Button";
+import Overlay from "./Overlay";
 
 export default function Dialog({ onClose, children }) {
     const onEscape = e => {
@@ -19,29 +19,15 @@ export default function Dialog({ onClose, children }) {
             <Overlay onClose={onClose} />
             <div class="s-dialog">
                 <div class="back">
-                    <div class="wrapper">
-                        {children}
-                    </div>
+                    <div class="wrapper">{children}</div>
                 </div>
             </div>
         </Portal>
     );
 }
-Dialog.Header = ({ children }) => (
-    <div class="header">
-        {children}
-    </div>
-);
-Dialog.Content = ({ children }) => (
-    <div class="content">
-        {children}
-    </div>
-);
-Dialog.Footer = ({ children }) => (
-    <div class="footer">
-        {children}
-    </div>
-);
+Dialog.Header = ({ children }) => <div class="header">{children}</div>;
+Dialog.Content = ({ children }) => <div class="content">{children}</div>;
+Dialog.Footer = ({ children }) => <div class="footer">{children}</div>;
 
 export function SimpleDialog({ header, content, footer, onClose }) {
     return (

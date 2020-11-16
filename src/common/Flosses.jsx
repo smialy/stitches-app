@@ -52,7 +52,7 @@ function Floss({ floss, removeable, readonly, onAction }) {
     const { id, type, name, sid, quantity, identifier, color, shortage } = floss;
     const onEdit = () => onAction && onAction({ name: "edit", payload: { floss } });
 
-    const className = ['floss'];
+    const className = ["floss"];
     if (readonly) {
         className.push("floss--readonly");
     }
@@ -67,9 +67,11 @@ function Floss({ floss, removeable, readonly, onAction }) {
             <span class="floss-name">{name}</span>
             <span class="floss-quantity">{quantity}</span>
 
-            {removeable && (<span class="floss-actions">
-                {removeable && <Icons.Delete onClick={() => console.log('remove')} />}
-            </span>)}
+            {removeable && (
+                <span class="floss-actions">
+                    {removeable && <Icons.Delete onClick={() => console.log("remove")} />}
+                </span>
+            )}
         </div>
     );
 }

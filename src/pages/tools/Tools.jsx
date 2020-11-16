@@ -1,7 +1,7 @@
 import { h } from "preact";
 
 import { Tabs, Tab } from "../../ui/Tabs";
-import Page from '../../ui/Page';
+import Page from "../../ui/Page";
 import DatabaseTab from "./Database";
 import FlossTab from "./Floss";
 
@@ -11,7 +11,6 @@ export default function ToolsPage() {
         <Page>
             <Page.Header>Tools</Page.Header>
             <Page.Body>
-
                 <Tabs onChange={onChange}>
                     <Tab name="flosses" label="Flosses">
                         <FlossTab />

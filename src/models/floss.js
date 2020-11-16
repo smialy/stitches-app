@@ -1,7 +1,7 @@
 export default class Floss {
     static entities() {
         return {
-            floss: "++id,&sid,type,identifier,name,color,quantity,createdAt",
+            floss: "++id,&sid,type,identifier,createdAt", //name,color,quantity
         };
     }
     constructor(db) {

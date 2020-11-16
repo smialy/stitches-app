@@ -6,12 +6,11 @@ body, html {
 #app {
     height: inherit;
     display: grid;
+    grid-template-rows: 64px 1fr;
     grid-template-columns: var(--app-menu-width) auto;
-    grid-template-rows: 64px auto;
     grid-template-areas:
         "header header"
         "sidebar main";
-
 }
 #appbar {
     grid-area: header;

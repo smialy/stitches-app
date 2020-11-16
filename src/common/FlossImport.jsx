@@ -19,10 +19,7 @@ export function FlossImport({ onImport }) {
     };
     const importHandler = () => setFlosses(uniqueFlosses(parse(text)));
 
-    return (
-        <div class="floss-import">
-        </div>
-    );
+    return <div class="floss-import"></div>;
 }
 
 function parse(text) {
@@ -34,7 +31,7 @@ function parse(text) {
             type: row[0],
             identifier: row[1],
             quantity: row[11],
-            color: '#fff',
+            color: "#fff",
         }));
     }
 
@@ -64,7 +61,7 @@ function uniqueBy(records, field) {
 }
 
 function uniqueFlosses(flosses) {
-    return uniqueBy(flosses, 'sid');
+    return uniqueBy(flosses, "sid");
 }
 
 function flossHash(floss) {

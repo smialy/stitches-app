@@ -25,7 +25,7 @@ export default function Database() {
                     identifier: row[0],
                     name: clean(row[1]),
                     color: clean(row[2]),
-                    quantity: 1,
+                    quantity: 0,
                 }));
             await db.floss.clear();
             await db.project.clear();
